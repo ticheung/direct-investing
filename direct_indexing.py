@@ -190,11 +190,15 @@ def main():
     # Remove HXT from the security columns and prices if we don't want to include it in our portfolio
     if 'HXT' in security_columns:
         security_columns.remove('HXT')
+        security_columns.remove('ENB')
         security_prices = security_prices[security_columns]
     
     # Calculate returns (daily percentage changes)
     security_returns = security_prices.pct_change().dropna()
     market_returns = market_index.pct_change().dropna()
+
+    security_returns = security_returns[(security_returns.index.month >= 9) & (security_returns.index.month <= 10)]
+    market_returns = market_returns[(market_returns.index.month >= 9) & (market_returns.index.month <= 10)]
     
     # Optimize weights for direct indexing portfolio
     # Note: limiting to 20 securities, can be adjusted as needed
@@ -210,18 +214,32 @@ def main():
             print(f"{security}: {weight:.4f}")
     
     # Calculate portfolio performance
-    portfolio_values = calculate_portfolio_performance(security_prices, optimized_weights)
+    portfolio_values = calculate_portfolio_performance(
+        security_prices[(security_prices.index.month >= 11) & (security_prices.index.month <= 11)],
+        optimized_weights
+    )
     
     # Calculate tracking error
-    tracking_error = calculate_tracking_error(portfolio_values, market_index)
+    tracking_error = calculate_tracking_error(
+        portfolio_values,
+        market_index[(market_index.index.month >= 11) & (market_index.index.month <= 11)]
+    )
     print(f"\nTracking Error (RMSE): {tracking_error:.6f}")
     
     # Calculate correlation between portfolio and index
-    correlation = np.corrcoef(portfolio_values, market_index)[0, 1]
+    correlation = np.corrcoef(
+        portfolio_values,
+        market_index[(market_index.index.month >= 11) & (market_index.index.month <= 11)]
+    )[0, 1]
     print(f"Correlation with Market Index: {correlation:.6f}")
     
     # Plot results
-    plot_comparison(security_prices.index, portfolio_values, market_index, security_weight_dict)
+    plot_comparison(
+        security_prices.index[(security_prices.index.month >= 11) & (security_prices.index.month <= 11)],
+        portfolio_values,
+        market_index[(market_index.index.month >= 11) & (market_index.index.month <= 11)],
+        security_weight_dict
+    )
     
     # Save the optimized portfolio to CSV for reference
     result_df = market_data.copy()

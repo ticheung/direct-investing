@@ -1,1 +1,4 @@
 .venv/
+direct_indexing_results.csv
+experiment/
+*.ipynb
